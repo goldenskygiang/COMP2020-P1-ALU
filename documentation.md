@@ -24,8 +24,8 @@ The result of these notations will have its own new indexes for each bit, indepe
 - Op[1,3]: to be put through an AND gate to obtain EV signal (to be explained in later parts).
 - Op[0]: subfunction bit to differentiate among function groups (to be explained in later parts).
 
-## 32-bit adder/subtracter circuit (Add32)
-### a) 1-bit full adder
+## 32-bit adder/subtractor circuit (Add32)
+### a) 1-bit full adder (Add1)
 ![1-bit full adder](imgs/1bitadder.png)
 
 The circuit receives 3 bits A, B, and Cin - the carry-in value from previous 1-bit add/subtract operation.
@@ -44,7 +44,7 @@ It will output S and Cout - the carry-out value for the next adder.
 |1|1| 0 |0| 1  |
 |1|1| 1 |1| 1  |
 
-### b) 4-bit adder
+### b) 4-bit adder (Add4)
 ![4-bit adder](imgs/4bitadder.png)
 
 The circuit receives two 4-bit signed integers A and B, a carry-in bit Cin and a control bit Sub. It splits A and B into 4 bits of each, and adds to their respective 1-bit full adder.
@@ -56,7 +56,7 @@ In case of subtraction (A - B), B is negated by the XOR gate before going into 1
 - Cout: get the carry-out bit from the last bit adder to be carried to the next adder in sequence.
 - V: overflow signal of 4-bit adder.
 
-### c) 16-bit adder
+### c) 16-bit adder (Add16)
 ![Add16 circuit](imgs/16bitadder.png)
 
 The circuit receives two 16-bit signed integers A and B, a carry-in bit Cin and a control bit Sub. The architecture is similar to that of a 4-bit adder, but this circuit splits each of A and B into 4 groups of 4 bits.
@@ -70,7 +70,7 @@ The outputs V from 4-bit adders are discarded, except for the last 4-bit adder f
 - Cout: get the carry-out bit from the last bit adder to be carried to the next adder in sequence.
 - V: overflow signal of 16-bit adder.
 
-### d) 32-bit adder
+### d) 32-bit adder (Add32)
 ![Add32 circuit](imgs/Add32.png)
 
 The 32-bit adder circuit is constructed by stacking two 16-bit adders in sequence. Similar to other adders, this circuit split 32-bit integers A and B into two 16-bit numbers, then adds to their respective 16-bit adders.
@@ -80,14 +80,23 @@ The 32-bit adder circuit is constructed by stacking two 16-bit adders in sequenc
 - V: overflow signal of 32-bit adder.
 
 ### e) EV signal
-![EV signal](imgs/EVcheck.png)
+The EV signal receives from the ALU Op splitter 2 bits Op[1] and Op[3], then negates Op[3] and put two bits through an AND gate.
 
-The EV signal from the ALU Op splitter will be put through an AND gate with the V output from the Add32 circuit to determine whether to enable output V.
+![EV inputs](imgs/EVinput.png)
+
+|Op[1]|Op[3]|EV|
+|:-:|:-:|:-:|
+|1|0| 1 |
+| Otherwise || 0 |
+
+EV will be put through an AND gate with the V signal from the Add32 circuit to determine whether to enable output V of the ALU.
+
+![EV signal](imgs/EVcheck.png)
 
 This signal allows V to be turned on **if and only if** the ALU Op code is addition/subtraction and the result is overflown.
 
-|V_Add32|EV|V_ALU|
-|:-:|-|:--:|
+|EV|V_Add32|V_ALU|
+|:-:|:-:|:-:|
 |0|0| 0 |
 |0|1| 0 |
 |1|0| 0 |
@@ -97,15 +106,20 @@ This signal allows V to be turned on **if and only if** the ALU Op code is addit
 The ALU Op splitter will get these 3 outputs to serve the Add32 circuit:
 - Op[1:3]: master MUX output.
 - Op[2]: Cin value. 0 if addition, 1 if subtraction.
-- Op[1,3]: EV signal.
+- Op[1,3]: Input for EV signal.
 
-If Op[0:3] = `001x` or `011x`, it will send the above respective values to their approriate circuits to function.
+If Op = `001x` or `011x`, it will send the above respective values to their approriate circuits to function.
 
-If Op[0:3] = **`001x`**, the master MUX will output the **addition** operation's result.
+If Op = **`001x`**, the master MUX will output the **addition** operation's result.
 
-If Op[0:3] = **`011x`**, the master MUX will output the **subtraction** operation's result.
+If Op = **`011x`**, the master MUX will output the **subtraction** operation's result.
 
 Otherwise, the master MUX will **not** output addition/subtraction operation's result.
+
+|Op|Op[1:3] (MUX)|Op[2] (Cin)|(EV)|
+|-|:-:|:-:|:-:|
+|001x|001|0|1|
+|011x|011|1|1|
 
 ## 32-bit shifter (LRShift32)
 
