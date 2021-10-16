@@ -1,6 +1,24 @@
 # Project 1 - ALU Design Documentation
 
 ## Table of Contents
+- [Overview](#overview)
+- [ALU Op splitter](#alu-op-splitter)
+- [32-bit adder/subtractor circuit (Add32)](#32-bit-addersubtractor-circuit-add32)
+  - [a) 1-bit full adder (Add1)](#a-1-bit-full-adder-add1)
+  - [b) 4-bit adder (Add4)](#b-4-bit-adder-add4)
+  - [c) 16-bit adder (Add16)](#c-16-bit-adder-add16)
+  - [d) 32-bit adder (Add32)](#d-32-bit-adder-add32)
+  - [e) EV signal](#e-ev-signal)
+  - [f) Working mechanism](#f-working-mechanism)
+- [32-bit shifter (LRShift32)](#32-bit-shifter-lrshift32)
+  - [a) 1-bit left shifter (LeftShift1)](#a-1-bit-left-shifter-leftshift1)
+  - [b) 2,4,8,16-bit left shifter (LeftShift2/4/8/16)](#b-24816-bit-left-shifter-leftshift24816)
+  - [c) 32-bit left shifter (LeftShift32)](#c-32-bit-left-shifter-leftshift32)
+  - [d) Reverse circuit (reverse)](#d-reverse-circuit-reverse)
+  - [e) 32-bit left-right shifter (LRShift32)](#e-32-bit-left-right-shifter-lrshift32)
+- [Logic operations](#logic-operations)
+- [Comparison circuits](#comparison-circuits)
+- [Master MUX](#master-mux)
 
 
 ## Overview
@@ -121,7 +139,7 @@ If Op = **`001x`**, the master MUX will output the **addition** operation's resu
 
 If Op = **`011x`**, the master MUX will output the **subtraction** operation's result.
 
-Otherwise, the master MUX will **not** output addition/subtraction operation's result.
+Otherwise, the master MUX will **not** output this circuit's result.
 
 |Op|Op[1:3] (MUX)|Op[2] (Cin)|(EV)|
 |:-:|:-:|:-:|:-:|
@@ -137,7 +155,7 @@ The base 1-bit left shifter circuit receives two inputs: 32-bit integer **A** an
 
 **A** is splitted into 32 bits using an A-splitter, then joined with another 32-bit Cout-splitter with the pin 31 of A-splitter left unused.
 
-On the other hand, the **Cin** bit is connected to the pin 0 of the Cout-splitter, so that **Cout** is the result of shifting A 1 bit to the left and filled with **Cin**.
+On the other hand, the **Cin** bit is connected to the pin 0 of the Cout-splitter, so that **Cout** is the result of shifting **A** 1 bit to the left and filled with **Cin**.
 
 ### b) 2,4,8,16-bit left shifter (LeftShift2/4/8/16)
 ![2-bit left shifter](imgs/ls2.png)
@@ -156,10 +174,43 @@ Each bit in **Sa** determines which left shifter to be used. Bit at position <im
 
 Because every integer can be expressed as a sum of powers of 2, this architecture makes left shifting possible with any number of bits from 0 to 31.
 
-### d) Reverse circuit
+### d) Reverse circuit (reverse)
 ![32-bit reverse](imgs/reverse.png)
 
+This circuit simply reverse the positions of every bit from the input. A splitter is attached to the input A, then connected to another splitter attached to output B - with reversed order of pins.
+
+Another output pin Sign is attached to the pin 31 of the splitter of A to get the sign bit of A to support right shifting function.
+
 ### e) 32-bit left-right shifter (LRShift32)
+![32-bit left-right shifter](imgs/LRShift32.png)
+
+This circuit receives 3 inputs: a 32-bit integer **A**, a 2-bit **Opcode** and a 5-bit unsigned **Sa**.
+
+Note that this circuit's **Opcode** is different from that of the whole ALU. This **Opcode** is extracted from Op[0,3] of the ALU:
+- Opcode[0] determines whether the command is a shift right logical (SRL) (0) or shift right arithmetic (SRA) (1) (Only applies when Opcode[1]=1).
+- Opcode[1] determines whether the command is a shift left logical (SLL) (0) or a shift right (1).
+
+|Opcode|Command|
+|:-:|:-:|
+|00|SLL|
+|01|SLL|
+|10|SRL|
+|11|SRA|
+
+When doing a shift right, the circuit first reverses the order of input bits, then passes to the LeftShift32 circuit, and reverses the output again so that shift right is performed with only **one** left shift circuit.
+
+The only type of left shift is logical (SLL), so it simply shifts the input bits to the left and fills in bit 0s to the right.
+
+There are two types of right shift: logical (SRL) and arithmetic (SRA). SRL automatically fills bit 0s to the left, while SRA fills the sign bit of the input (0s or 1s). SRA fills in bit 1s **if and only if** the input is negative, and otherwise.
+
+In order to get the Cin bit to be filled in, this circuit takes the output of an AND gate accepting three 1-bit inputs: Opcode[0], Opcode[1], and Sign bit from the first reverse circuit.
+
+In other words, Cin=1 **if and only if** the command is a shift right (Opcode[1]=1), a SRA (Opcode[0]=1), and Sign=1 (the input **A** is negative). Otherwise, Cin=0 corresponds to either SLL, SRL or SRA of a non-negative integer.
+
+|Opcode[1]|Opcode[0]|Sign|Cin|
+|:-:|:-:|:-:|:-:|
+|1|1|1|1|
+|Otherwise|||0|
 
 ## Logic operations
 ![Logic gates](imgs/logicGates.png)
@@ -179,7 +230,7 @@ The master 8-to-1 MUX determines the output of the ALU according to its Op[1:3] 
 
 Below is the table of MUX groupings:
 
-|Op[1:3]|x|Function|
+|Op[1:3]|Op[0] (x)|Function|
 |:-:|:-:|:-:|
 |000|any|shift left logical|
 |001|any| add
