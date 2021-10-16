@@ -12,8 +12,10 @@ This is a 32-bit ALU which can perform basic operations on 32-bit signed integer
 The 4-bit Op is splitted into multiple outputs to serve different purposes.
 
 **Notation**:
-- Op[$x:y$]: continuous bit segment from position $x$ to position $y$ (inclusive);
-- Op[$x_1, x_2, ..., x_n$]: the output consists of bits Op[$x_1$], Op[$x_2$], ..., Op[$x_n$] to be placed respectively, as a group.
+- Op[<img src="https://render.githubusercontent.com/render/math?math=x:y">
+]: continuous bit segment from position $x$ to position $y$ (inclusive);
+- Op[<img src="https://render.githubusercontent.com/render/math?math=x_1, x_2, ..., x_n$">]: the output consists of bits Op[<img src="https://render.githubusercontent.com/render/math?math=x_1">
+], Op[<img src="https://render.githubusercontent.com/render/math?math=x_2">], ..., Op[<img src="https://render.githubusercontent.com/render/math?math=x_n">] to be placed respectively, as a group.
 
 The output will have its own new indexes for each bit, independent of how it was calculated.
 
