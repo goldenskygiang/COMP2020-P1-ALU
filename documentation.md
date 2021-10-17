@@ -235,6 +235,7 @@ This circuit compares two input integers of the ALU. **ne** operation checks if 
 These 2 operations are implemented in a single circuit due to similar **Op[1:3]** (`100`). This circuit receives two inputs: a 32-bit integer **A** calculated from the XOR gate of both inputs from the ALU, and a 1-bit **eq** to switch the circuit's behavior.
 
 ![Input path to ne/eq circuit](imgs/nepath.png)
+
 *Input path to ne/eq circuit in orange.*
 
 The 2 inputs **A** and **B** of the ALU is equal **if and only if** their XOR value is 0. Therefore, this circuit reuses the result from the XOR gate and uses a 32 1-bit input OR gate to find if there is any bit 1 from that.
