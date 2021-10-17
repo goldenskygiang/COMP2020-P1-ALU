@@ -4,3 +4,4 @@ ALU_testgen.exe
 opcode.txt
 srl.txt
 ALU_test_vector.txt
+extests/
