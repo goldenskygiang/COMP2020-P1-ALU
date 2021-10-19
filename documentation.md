@@ -201,7 +201,7 @@ Note that this circuit's **Opcode** is different from that of the whole ALU. Thi
 |10|SRL|
 |11|SRA|
 
-When doing a shift right, the circuit first reverses the order of input bits, then passes to the LeftShift32 circuit, and reverses the output again so that shift right is performed with only **one** left shift circuit.
+When doing a shift right, the circuit first reverses the order of input bits, then passes to the LeftShift32 circuit, and reverses the output again so that both shift right and left are performed with **one** common left shift circuit.
 
 The only type of left shift is logical (SLL), so it simply shifts the input bits to the left and fills in bit 0s to the right.
 
