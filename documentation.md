@@ -183,7 +183,7 @@ Because every integer can be expressed as a sum of powers of 2, this architectur
 
 This circuit simply reverses the positions of every bit from the input. A splitter is attached to the input **A**, then connected to another splitter attached to output **B** - with reversed order of pins.
 
-Another output pin **Sign** is attached to the pin 31 of the splitter of **A** to get the sign bit of **A** to support right shifting function.
+Another output pin **Sign** is attached to the pin 31 of the splitter of **A** to get the sign bit of **A** to support shift right arithmetic function.
 
 ### e) 32-bit left-right shifter (LRShift32)
 ![32-bit left-right shifter](imgs/LRShift32.png)
